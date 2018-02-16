@@ -9,7 +9,7 @@
   <artifactId>joda-time-hibernate</artifactId>
   <packaging>jar</packaging>
   <name>Joda-Time-Hibernate</name>
-  <version>1.5-SNAPSHOT</version>
+  <version>1.5-hibernate5</version>
   <description>Contribution to Joda-Time that adds Hibernate support</description>
   <url>http://www.joda.org/joda-time-hibernate/</url>
 
@@ -85,7 +85,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
-          <classifier>hibernate5</classifier>
           <archive>
             <manifestFile>src/conf/MANIFEST.MF</manifestFile>
             <manifest>
