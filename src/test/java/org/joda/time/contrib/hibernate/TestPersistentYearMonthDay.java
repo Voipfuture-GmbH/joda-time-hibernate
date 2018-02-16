@@ -19,7 +19,6 @@ import java.io.File;
 import java.sql.SQLException;
 
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.joda.time.YearMonthDay;
 
@@ -33,9 +32,7 @@ public class TestPersistentYearMonthDay extends HibernateTestCase
 
     public void testSimpleStore() throws SQLException
     {
-        SessionFactory factory = getSessionFactory();
-
-        Session session = factory.openSession();
+        Session session = newSession();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
@@ -48,15 +45,14 @@ public class TestPersistentYearMonthDay extends HibernateTestCase
             session.save(event);
         }
 
-        session.flush();
-        session.connection().commit();
+        commitCurrentConnection(session);
         session.close();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
             YearMonthDay writeReadTime = writeReadTimes[i];
 
-            session = factory.openSession();
+            session = newSession();
             Schedule eventReread = (Schedule) session.get(Schedule.class, new Integer(i));
 
             assertNotNull("get failed - event#'" + i + "'not found", eventReread);

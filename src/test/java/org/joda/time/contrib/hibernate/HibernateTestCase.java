@@ -15,15 +15,18 @@
  */
 package org.joda.time.contrib.hibernate;
 
-import junit.framework.TestCase;
+import java.sql.Connection;
+import java.sql.SQLException;
 
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.HSQLDialect;
-import org.hibernate.tool.hbm2ddl.SchemaUpdate;
+import org.hibernate.jdbc.Work;
 
-import java.sql.Connection;
-import java.sql.Statement;
+import junit.framework.TestCase;
 
 public abstract class HibernateTestCase extends TestCase
 {
@@ -34,43 +37,73 @@ public abstract class HibernateTestCase extends TestCase
     {
         if (this.factory == null)
         {
-                    cfg = new Configuration();
+            cfg = new Configuration();
 
-                    setupConfiguration(cfg);
+            setupConfiguration(cfg);
 
             cfg.setProperty("hibernate.connection.driver_class", "org.hsqldb.jdbcDriver");
             cfg.setProperty("hibernate.connection.url", "jdbc:hsqldb:mem:hbmtest" + getClass().getName());
             cfg.setProperty("hibernate.dialect", HSQLDialect.class.getName());
-
             cfg.setProperty("hibernate.show_sql", "true");
+            cfg.setProperty("hibernate.hbm2ddl.auto", "create-drop" );
+            cfg.setProperty("hibernate.connection.autocommit", "true" );
+
             SessionFactory factory = cfg.buildSessionFactory();
-
-            SchemaUpdate update = new SchemaUpdate(cfg);
-            update.execute(true, true);
-
             this.factory = factory;
         }
         return factory;
     }
 
+    private Session session;
+    private Transaction transaction;
+    
+    protected Session newSession() {
+        SessionFactory factory = getSessionFactory();
+        this.session = factory.openSession();
+        this.session.setHibernateFlushMode(FlushMode.ALWAYS);
+        startTransaction();
+        return session;
+    }
+    
+    protected void startTransaction() {
+        if ( this.session == null ) {
+            newSession();
+        }
+        this.transaction = this.session.getTransaction();
+        this.transaction.begin();
+    }
+    
+    protected void commitTransaction() {
+        this.transaction.commit();
+        this.transaction = null;
+    }
+
+    protected void commitCurrentConnection(Session session) throws SQLException 
+    {
+        if ( this.transaction != null ) {
+            this.transaction.commit();
+        }
+        doWithConnection( session, new Work() 
+        {
+            public void execute(Connection connection) throws SQLException {
+                connection.commit();
+            }
+        });
+    }
+
+    protected void doWithConnection(Session session, Work work) throws SQLException {
+        session.doWork( work );
+    }
+
     protected void tearDown() throws Exception
     {
-            final String[] dropSQLs = cfg.generateDropSchemaScript(new HSQLDialect());
-            final Connection connection = getSessionFactory().openSession().connection();
-            try {
-                Statement stmt = connection.createStatement();
-                for (int i = 0; i < dropSQLs.length; i++) {
-                    //System.out.println("dropSQLs[i] = " + dropSQLs[i]);
-                    stmt.executeUpdate(dropSQLs[i]);
-                }
-            } finally {
-                connection.close();
-            }
-
-            if (this.factory != null)
+        if (this.factory != null)
         {
-            this.factory.close();
-            this.factory = null;
+            try {
+                this.factory.close();
+            } finally {
+                this.factory = null;
+            }
         }
     }
 

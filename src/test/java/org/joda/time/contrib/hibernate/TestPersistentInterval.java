@@ -55,7 +55,6 @@ public class TestPersistentInterval extends HibernateTestCase
         plan.setPeriod(period);
         
         session.save(plan);
-        session.flush();
         
         commitAndClose();
     }

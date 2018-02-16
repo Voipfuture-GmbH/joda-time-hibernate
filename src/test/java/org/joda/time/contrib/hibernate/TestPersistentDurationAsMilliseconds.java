@@ -15,7 +15,10 @@
  */
 package org.joda.time.contrib.hibernate;
 
-import junit.framework.Assert;
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+
 import org.hibernate.Session;
 import org.hibernate.cfg.Configuration;
 import org.joda.time.DateTime;
@@ -23,9 +26,7 @@ import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.joda.time.contrib.hibernate.testmodel.SomethingThatLasts;
 
-import java.io.IOException;
-import java.io.File;
-import java.sql.SQLException;
+import junit.framework.Assert;
 
 /**
  * @author gjoseph
@@ -42,7 +43,7 @@ public class TestPersistentDurationAsMilliseconds extends HibernateTestCase {
     };
 
     public void testSimpleStore() throws SQLException, IOException {
-        Session session = getSessionFactory().openSession();
+        Session session = newSession();
 
         for (int i = 0; i < durations.length; i++) {
             SomethingThatLasts thing = new SomethingThatLasts();
@@ -52,12 +53,11 @@ public class TestPersistentDurationAsMilliseconds extends HibernateTestCase {
             session.save(thing);
         }
 
-        session.flush();
-        session.connection().commit();
+        commitCurrentConnection(session);
         session.close();
 
         for (int i = 0; i < durations.length; i++) {
-            session = getSessionFactory().openSession();
+            session = newSession();
             SomethingThatLasts lastingThing = (SomethingThatLasts) session.get(SomethingThatLasts.class, new Long(i));
 
             Assert.assertNotNull(lastingThing);

@@ -19,7 +19,6 @@ import java.io.File;
 import java.sql.SQLException;
 
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.joda.time.LocalTime;
 
@@ -35,9 +34,7 @@ public class TestPersistentLocalTime extends HibernateTestCase
 
     public void testSimpleStore() throws SQLException
     {
-        SessionFactory factory = getSessionFactory();
-
-        Session session = factory.openSession();
+        Session session = newSession();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
@@ -53,15 +50,14 @@ public class TestPersistentLocalTime extends HibernateTestCase
             session.save(event);
         }
 
-        session.flush();
-        session.connection().commit();
+        commitCurrentConnection(session);
         session.close();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
             LocalTime writeReadTime = writeReadTimes[i];
 
-            session = factory.openSession();
+            session = newSession();
             Event eventReread = (Event) session.get(Event.class, new Integer(i));
 
             assertNotNull("get failed - event#'" + i + "'not found", eventReread);

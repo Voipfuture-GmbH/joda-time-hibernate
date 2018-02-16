@@ -17,8 +17,8 @@ package org.joda.time.contrib.hibernate;
 
 import java.io.File;
 import java.sql.SQLException;
+
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.joda.time.DateTime;
 
@@ -33,9 +33,7 @@ public class TestPersistentDateTimeAsBigInt extends HibernateTestCase
 
     public void testSimpleStore() throws SQLException
     {
-        SessionFactory factory = getSessionFactory();
-
-        Session session = factory.openSession();
+        Session session = newSession();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
@@ -48,15 +46,14 @@ public class TestPersistentDateTimeAsBigInt extends HibernateTestCase
             session.save(thing);
         }
 
-        session.flush();
-        session.connection().commit();
+        commitCurrentConnection(session);
         session.close();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
             DateTime writeReadTime = writeReadTimes[i];
 
-            session = factory.openSession();
+            session = newSession();
             ThingWithDateTime thingReread = (ThingWithDateTime)session.get(ThingWithDateTime.class, new Integer(i));
 
             assertNotNull("get failed - thing#'" + i + "'not found", thingReread);

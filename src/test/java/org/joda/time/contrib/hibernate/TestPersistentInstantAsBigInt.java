@@ -36,7 +36,7 @@ public class TestPersistentInstantAsBigInt extends HibernateTestCase
     {
         SessionFactory factory = getSessionFactory();
 
-        Session session = factory.openSession();
+        Session session = newSession();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
@@ -49,15 +49,14 @@ public class TestPersistentInstantAsBigInt extends HibernateTestCase
             session.save(thing);
         }
 
-        session.flush();
-        session.connection().commit();
+        commitCurrentConnection(session);
         session.close();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
             Instant writeReadTime = writeReadTimes[i];
 
-            session = factory.openSession();
+            session = newSession();
             ThingWithInstant thingReread = (ThingWithInstant)session.get(ThingWithInstant.class, new Integer(i));
 
             assertNotNull("get failed - thing#'" + i + "'not found", thingReread);

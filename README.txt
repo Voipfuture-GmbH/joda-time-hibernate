@@ -1,3 +1,16 @@
+This is a fork of the joda-time-hibernate project that adds support for Hibernate 5 and JDK >= 9.
+
+For building with JDK 9 and upwards you will need to activate an additional maven profile (pass '-Pjdk9' to maven invocations).
+
+The generated artifact (JAR) needs to be used with <classifier>hibernate5</classifier> , so a dependency will need to look like this:
+
+<dependency>
+  <groupId>joda-time</groupId>
+  <artifactId>joda-time-hibernate</artifactId>
+  <version>1.5</version>
+  <classifier>hibernate5</classifier>
+</dependency>
+
 
 Joda-Time Contributions area - Hibernate support
 ================================================

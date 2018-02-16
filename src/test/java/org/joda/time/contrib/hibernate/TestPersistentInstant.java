@@ -19,7 +19,6 @@ import java.io.File;
 import java.sql.SQLException;
 
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.joda.time.Instant;
 
@@ -34,9 +33,7 @@ public class TestPersistentInstant extends HibernateTestCase
 
     public void testSimpleStore() throws SQLException
     {
-        SessionFactory factory = getSessionFactory();
-
-        Session session = factory.openSession();
+        Session session = newSession();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
@@ -49,15 +46,14 @@ public class TestPersistentInstant extends HibernateTestCase
             session.save(thing);
         }
 
-        session.flush();
-        session.connection().commit();
+        commitCurrentConnection(session);
         session.close();
 
         for (int i = 0; i<writeReadTimes.length; i++)
         {
             Instant writeReadTime = writeReadTimes[i];
 
-            session = factory.openSession();
+            session = newSession();
             ThingWithInstant thingReread = (ThingWithInstant)session.get(ThingWithInstant.class, new Integer(i));
 
             assertNotNull("get failed - thing#'" + i + "'not found", thingReread);

@@ -85,6 +85,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
+          <classifier>hibernate5</classifier>
           <archive>
             <manifestFile>src/conf/MANIFEST.MF</manifestFile>
             <manifest>
@@ -98,6 +99,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <argLine>${surefire.jvm.args}</argLine>
           <includes>
             <include>**/Test*</include>
           </includes>
@@ -317,13 +319,13 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>3.6.0.Final</version>
+      <version>${hibernate.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-      <version>3.6.0.Final</version>
+      <version>${hibernate.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -434,6 +436,12 @@
   <!-- ==================================================================== -->
   <profiles>
     <profile>
+      <id>jdk9</id>
+      <properties>
+        <surefire.jvm.args>--add-modules java.xml.bind</surefire.jvm.args>
+      </properties>
+    </profile>
+    <profile>
       <id>repo-sign-artifacts</id>
       <activation>
         <property>
@@ -457,7 +465,7 @@
             <configuration>
               <toolchains>
                 <jdk>
-                  <version>1.5</version>
+                  <version>1.6</version>
                   <vendor>sun</vendor>
                 </jdk>
               </toolchains>
@@ -499,6 +507,8 @@
 
   <!-- ==================================================================== -->
   <properties>
+    <surefire.jvm.args></surefire.jvm.args>
+    <hibernate.version>5.2.13.Final</hibernate.version>
     <!-- Plugin version numbers -->
     <maven-assembly-plugin.version>2.5.3</maven-assembly-plugin.version>
     <maven-changes-plugin.version>2.11</maven-changes-plugin.version>
@@ -524,8 +534,8 @@
     <maven-toolchains-plugin.version>1.1</maven-toolchains-plugin.version>
     <!-- Properties for maven-compiler-plugin -->
     <maven.compiler.compilerVersion>1.5</maven.compiler.compilerVersion>
-    <maven.compiler.source>1.5</maven.compiler.source>
-    <maven.compiler.target>1.5</maven.compiler.target>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
     <maven.compiler.fork>true</maven.compiler.fork>
     <maven.compiler.verbose>true</maven.compiler.verbose>
     <maven.compiler.optimize>true</maven.compiler.optimize>
